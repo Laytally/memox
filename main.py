@@ -12,7 +12,7 @@ class notepad:
 	# 기본창 크기 설정
 	__thisWidth = 300
 	__thisHeight = 300
-	__thisTextArea = Text(__root)
+	__thisTextArea = Text(__root, wrap=WORD, undo=True, font=("맑은 고딕", 11), padx=5, pady=5)
 	__thisMenuBar = Menu(__root)
 	__thisFileMenu = Menu(__thisMenuBar, tearoff=0)
 	__thisHelpMenu = Menu(__thisMenuBar, tearoff=0)
@@ -94,41 +94,64 @@ class notepad:
 	
 	# 메모장 여는 함수
 	def __openFile(self):
-		self.__file = askopenfilename(defaultextension=".txt", filetypes=[("All Files", "*.*"), ("Text Documents", "*.txt")])
-		
-		# 조건문
+		self.__file = askopenfilename(
+			defaultextension=".txt",
+			filetypes=[
+				("Text Documents","*.txt"),
+				("All Files", "*.*")
+			]
+    )
+
 		if self.__file == "":
 			self.__file = None
-		else:
-			self.__root.title(os.path.basename(self.__file) + " - MemoX")
-			self.__thisTextArea.delete(1.0,END)
-			file = open(self.__file,"r")
-			self.__thisTextArea.insert(1.0,file.read())
-			file.close()
+			return
+
+		self.__root.title(
+			os.path.basename(self.__file) + " - MemoX"
+    )
+		self.__thisTextArea.delete(1.0, END)
+
+		with open(self.__file, "r", encoding="utf-8") as file:
+			self.__thisTextArea.insert(
+				1.0,
+				file.read()
+			)
 
 	# 메모장 새로 여는 함수
 	def __newFile(self):
 		self.__root.title("제목없음 - MemoX")
 		self.__file = None
-		self.__thisTextArea.delete(1.0,END)
+		self.__thisTextArea.delete(1.0, END)
+		
 
 	# 메모장 저장하는 함수
 	def __saveFile(self):
 		if self.__file == None:
-			self.__file = asksaveasfilename(initialfile='Untitled.txt', defaultextension=".txt", filetypes=[("All Files", "*.*"), ("Text Documents","*.txt")])
-
+				# 새 파일 저장 (Save As)
+			self.__file = asksaveasfilename(
+				initialfile='Untitled.txt',
+				defaultextension=".txt",
+				filetypes=[
+					("Text Documents","*.txt"),
+					("All Files", "*.*")
+				]
+			)
 			if self.__file == "":
 				self.__file = None
-			else:
-				file = open(self.__file,"Untitled")
-				file.write(self.__thisTextArea.get(1.0,END))
-				file.close()
-				self.__root.title(os.path.basename(self.__file) + " - MemoX")
+				return
 
+			# 파일 저장
+			with open(self.__file, "w", encoding="utf-8") as file:
+					file.write(self.__thisTextArea.get(1.0, END))
+
+			# 제목 변경
+			self.__root.title(
+				os.path.basename(self.__file) + " - MemoX"
+			)
 		else:
-			file = open(self.__file,"w")
-			file.write(self.__thisTextArea.get(1.0,END))
-			file.close()
+			# 기존 파일 저장
+			with open(self.__file, "w", encoding="utf-8") as file:
+				file.write(self.__thisTextArea.get(1.0, END))
 
 	def run(self):
 		# 메인 애플리케이션 실행
